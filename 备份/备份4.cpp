@@ -1,0 +1,641 @@
+#include <iostream>
+#include <vector>
+#include <random>
+#include <ctime>
+#include <chrono>
+#include <graphics.h>
+#include <conio.h>
+#include <tchar.h>
+
+using namespace std;
+
+#define ULL unsigned long long
+
+#define create_down 1
+#define create_right 2
+#define create_left 3
+#define create_up 4
+const int WINDOW_WIDTH = 1440;
+const int WINDOW_HEIGHT = 1440;
+const int BUTTON_WIDTH = 192;
+const int BUTTON_HEIGHT = 75;
+
+// 游戏状态-----------------------------------
+bool isStartGame = false;
+bool running = true;
+bool isCreateMaze = false;
+// 游戏状态-----------------------------------
+
+int diff = 4;
+
+class MazeCreate
+{
+public:
+
+    struct Point
+    {
+        int x, y;
+    };
+
+    Point Start, End; // 起点和终点
+    int row, col; // 迷宫的行数和列数
+
+    struct InBlock
+    {
+        int row, col, direct;
+    };
+
+    vector<InBlock> Block; // 记录迷宫中的墙
+
+    int now_x = 1, now_y = 1; // 当前位置
+
+    int MazeMap[110][110]; // 迷宫地图
+
+
+
+    void CreateMaze() // 随机化Prim算法生成迷宫
+    {
+        init();
+        CountWall();
+        //diffchange();
+        MazeMap[now_x][now_y] = 1;
+        auto seed = chrono::system_clock::now().time_since_epoch().count();
+        srand(seed);
+        while (Block.size())
+        {
+            int sz = Block.size();
+            int index = rand() % sz;
+            int now_direct = Block[index].direct;
+            now_x = Block[index].row;
+            now_y = Block[index].col;
+            switch (now_direct)
+            {
+            case create_down:
+            {
+                now_x = Block[index].row + 1;
+                now_y = Block[index].col;
+                break;
+            }
+            case create_up:
+            {
+                now_x = Block[index].row - 1;
+                now_y = Block[index].col;
+                break;
+            }
+            case create_right:
+            {
+                now_x = Block[index].row;
+                now_y = Block[index].col + 1;
+                break;
+            }
+            case create_left:
+            {
+                now_x = Block[index].row;
+                now_y = Block[index].col - 1;
+                break;
+            }
+
+            }
+
+            if (MazeMap[now_x][now_y] == 1)
+            {
+                MazeMap[Block[index].row][Block[index].col] = 0;
+                MazeMap[now_x][now_y] = 0;
+                CountWall();
+            }
+            Block.erase(Block.begin() + index);
+
+        }
+    }
+
+    void PrintMaze()
+    {
+        for (int i = 0; i <= row + 2; i++)
+        {
+            for (int z = 0; z <= col + 2; z++)
+            {
+                if (i == Start.x && z == Start.y)
+                    cout << "S ";
+                else if (i == End.x && z == End.y)
+                    cout << "E ";
+                else
+                    cout << (MazeMap[i][z] == 1 ? "# " : "  ");
+            }
+            cout << endl;
+        }
+    }
+
+
+
+    void EasyxPrintMaze()
+    {
+        //diffchange();
+        //cout << "迷宫生成完毕，正在绘制迷宫……" << endl;
+        //settextcolor(BLACK);
+        int luxx = 100, luyy = 100, sz = 10;
+        if (diff == 1)
+        {
+			luxx = 400;
+            luyy = 100;
+            sz = 30;
+        }
+        else if (diff == 2)
+        {
+            sz = 15;
+            luxx = 350;
+            luyy = 100;
+        }
+        else if (diff == 3)
+        {
+            sz = 11;
+            luxx = 270;
+            luyy = 50;
+        }
+        else if (diff == 4)
+        {
+            sz = 10;
+            luxx = 250;
+            luyy = 10;
+        }
+
+        cout << sz << endl;
+        for (int i = 0; i <= row + 2; i++)
+        {
+            for (int z = 0; z <= col + 2; z++)
+            {
+                int nowposx = luxx + sz * z;
+                int nowposy = luyy + sz * i;
+                int lux = nowposx, luy = nowposy, ldx = nowposx + sz, ldy = nowposy, rux = nowposx, ruy = nowposy + sz, rdx = nowposx + sz, rdy = nowposy + sz;
+                if (i == Start.x && z == Start.y)
+                    setStart(lux, luy, ldx, ldy, rux, ruy, rdx, rdy);
+                else if (i == End.x && z == End.y)
+                    setEnd(lux, luy, ldx, ldy, rux, ruy, rdx, rdy);
+                else
+                {
+                    if (MazeMap[i][z] == 1)
+                        setWall(lux, luy, ldx, ldy, rux, ruy, rdx, rdy);
+                }
+            }
+        }
+    }
+
+private:
+    void init() // 初始化迷宫，默认为全墙
+    {
+        for (int i = 0; i <= col + 2; i++)
+            for (int z = 0; z <= row + 2; z++)
+                MazeMap[z][i] = 1;
+    }
+
+    void push(int x, int y, int dir) // 存放墙
+    {
+        Block.push_back({ x, y, dir });
+    }
+
+    int CountWall() // 计算当前位置周围的墙的数量
+    {
+        int count = 0;
+        if (now_x + 1 <= row)
+        {
+            push(now_x + 1, now_y, create_down);
+            count++;
+        }
+        if (now_x - 1 >= 1)
+        {
+            push(now_x - 1, now_y, create_up);
+            count++;
+        }
+        if (now_y + 1 <= col)
+        {
+            push(now_x, now_y + 1, create_right);
+            count++;
+        }
+        if (now_y - 1 >= 1)
+        {
+            push(now_x, now_y - 1, create_left);
+            count++;
+        }
+        return count;
+    }
+
+
+    void setWall(int lux, int luy, int ldx, int ldy, int rux, int ruy, int rdx, int rdy)
+    {
+        setfillcolor(BLACK);
+        POINT p[] = { {lux,luy},{ldx,ldy},{rdx,rdy},{rux,ruy},{lux,luy} };
+        solidpolygon(p, 4);
+    }
+    void setStart(int lux, int luy, int ldx, int ldy, int rux, int ruy, int rdx, int rdy)
+    {
+        setfillcolor(RGB(69, 200, 251));
+        POINT p[] = { {lux,luy},{ldx,ldy},{rdx,rdy},{rux,ruy},{lux,luy} };
+        solidpolygon(p, 4);
+    }
+    void setEnd(int lux, int luy, int ldx, int ldy, int rux, int ruy, int rdx, int rdy)
+    {
+        setfillcolor(RGB(252, 61, 73));
+        POINT p[] = { {lux,luy},{ldx,ldy},{rdx,rdy},{rux,ruy},{lux,luy} };
+        solidpolygon(p, 4);
+    }
+
+  /*  void diffchange()
+    {
+        if (diff == 1)
+        {
+            luxx = 100;
+            luyy = 100;
+            sz = 30;
+            col = row == 20;
+			Start = { 1,1 };
+			End = { 20,20 };
+        }
+        else if (diff == 2)
+        {
+            luxx = 75;
+            luyy = 75;
+            sz = 25;
+            col = row = 40;
+            Start = { 1,1 };
+			End = { 40,40 };
+        }
+        else if (diff == 3)
+        {
+            luxx = 50;
+            luyy = 50;
+            sz = 15;
+            col = row = 60;
+			Start = { 1,1 };
+			End = { 60,60 };
+        }
+        else if (diff == 3)
+        {
+            luxx = 30;
+            luyy = 30;
+            sz = 10;
+            col = row = 80;
+			Start = { 1,1 };
+			End = { 80,80 };
+        }
+    }*/
+
+};
+
+class Button // 按钮基类
+{
+
+public:
+    Button(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
+    {
+        region = rect;
+        loadimage(&img_idle, path_img_idle);
+        loadimage(&img_hovered, path_img_hovered);
+        loadimage(&img_pushed, path_img_pushed);
+        visible = true; // 按钮默认可见
+    }
+    ~Button() = default;
+
+    void Draw() // 绘制按钮
+    {
+        if (!visible) return; // 按钮不可见时不绘制
+        switch (status)
+        {
+        case Status::Idle:
+            putimage(region.left, region.top, &img_idle);
+            break;
+        case Status::Hovered:
+            putimage(region.left, region.top, &img_hovered);
+            break;
+        case Status::Pushed:
+            putimage(region.left, region.top, &img_pushed);
+            break;
+        }
+    }
+
+    void ProcessEvent(const ExMessage& msg)
+    {
+        if (!visible) return; // 按钮不可见时不处理事件
+        switch (msg.message)
+        {
+        case WM_MOUSEMOVE: // 鼠标移动事件
+            if (status == Status::Idle && CheckMousePos(msg.x, msg.y)) // 鼠标移动到按钮上
+                status = Status::Hovered;
+            else if (status == Status::Hovered && !CheckMousePos(msg.x, msg.y)) // 鼠标移出按钮
+                status = Status::Idle;
+            break;
+        case WM_LBUTTONDOWN: // 鼠标左键按下事件
+            if (status == Status::Hovered) // 鼠标在按钮上按下
+                status = Status::Pushed;
+            break;
+        case WM_LBUTTONUP: // 鼠标左键抬起事件
+            if (status == Status::Pushed) // 鼠标在按钮上抬起
+            {
+                status = Status::Hovered;
+                OnClick();
+            }
+            break;
+        default: // 其他非法事件
+            break;
+        }
+
+    }
+
+    void SetVisible(bool isVisible)
+    {
+        visible = isVisible;
+    }
+
+protected:
+    virtual void OnClick() = 0; // 纯虚函数，点击按钮时的操作
+
+private:
+
+    bool CheckMousePos(int x, int y) // 检查鼠标是否在按钮上
+    {
+        return x >= region.left && x <= region.right && y >= region.top && y <= region.bottom;
+    }
+
+    enum class Status // 按钮的状态枚举变量
+    {
+        Idle = 0,
+        Hovered,
+        Pushed
+    };
+
+private:
+    RECT region;
+    IMAGE img_idle;
+    IMAGE img_hovered;
+    IMAGE img_pushed;
+    Status status = Status::Idle;
+    bool visible; // 按钮可见性标志
+};
+
+// 继承Button基类，实现各自的OnClick函数
+class StartButton : public Button
+{
+public:
+    StartButton(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
+        : Button(rect, path_img_idle, path_img_hovered, path_img_pushed) {}
+    ~StartButton() = default;
+protected:
+    void OnClick()
+    {
+        isStartGame = true;
+        SetVisible(false); // 游戏开始时隐藏按钮
+    }
+};
+
+class HelpButton : public Button
+{
+public:
+    HelpButton(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
+        : Button(rect, path_img_idle, path_img_hovered, path_img_pushed) {}
+    ~HelpButton() = default;
+protected:
+    void OnClick()
+    {
+        MessageBox(GetHWnd(), _T("这是个还没有写的Help，然后就没有然后了"), _T("Help"), MB_OK);
+    }
+};
+
+class AboutButton : public Button
+{
+public:
+    AboutButton(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
+        : Button(rect, path_img_idle, path_img_hovered, path_img_pushed) {}
+    ~AboutButton() = default;
+protected:
+    void OnClick()
+    {
+        MessageBox(GetHWnd(), _T("这是一个还没写完的迷宫游戏……的菜单……"), _T("About"), MB_OK);
+    }
+
+};
+
+class ExitButton : public Button
+{
+public:
+    ExitButton(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
+        : Button(rect, path_img_idle, path_img_hovered, path_img_pushed) {}
+    ~ExitButton() = default;
+protected:
+    void OnClick()
+    {
+        running = false;
+    }
+};
+
+//class EasyButton : public Button
+//{
+//public:
+//	EasyButton(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
+//		: Button(rect, path_img_idle, path_img_hovered, path_img_pushed) {}
+//	~EasyButton() = default;
+//protected:
+//	void OnClick()
+//	{
+//		diff = 1;
+//	}
+//};
+//
+//class NormalButton : public Button
+//{
+//public:
+//	NormalButton(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
+//		: Button(rect, path_img_idle, path_img_hovered, path_img_pushed) {}
+//	~NormalButton() = default;
+//protected:
+//	void OnClick()
+//	{
+//		diff = 2;
+//	}
+//};
+//
+//class HardButton : public Button
+//{
+//public:
+//	HardButton(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
+//		: Button(rect, path_img_idle, path_img_hovered, path_img_pushed) {}
+//	~HardButton() = default;
+//protected:
+//	void OnClick()
+//	{
+//		diff = 3;
+//	}
+//};
+//
+//class LunaticButton : public Button
+//{
+//public:
+//	LunaticButton(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
+//		: Button(rect, path_img_idle, path_img_hovered, path_img_pushed) {}
+//	~LunaticButton() = default;
+//protected:
+//	void OnClick()
+//	{
+//		diff = 4;
+//	}
+//};
+
+class Theme// 主题类，包含所有按钮
+{
+public:
+    RECT region_start, region_exit, region_help, region_about;
+	//RECT region_easy, region_normal, region_hard, region_lunatic;
+    StartButton* start_button;
+    ExitButton* exit_button;
+    HelpButton* help_button;
+    AboutButton* about_button;
+	//EasyButton* easy_button;
+	//NormalButton* normal_button;
+	//HardButton* hard_button;
+	//LunaticButton* lunatic_button;
+
+    void InitTheme()// 初始化按钮
+    {
+        setbkcolor(WHITE);
+        region_start.left = (WINDOW_WIDTH) / 2 - BUTTON_WIDTH / 2 - 30;
+        region_start.right = region_start.left + BUTTON_WIDTH;
+        region_start.top = 100;
+        region_start.bottom = region_start.top + BUTTON_HEIGHT;
+
+        region_exit.left = (WINDOW_WIDTH) / 2 - BUTTON_WIDTH / 2 - 30;
+        region_exit.right = region_exit.left + BUTTON_WIDTH;
+        region_exit.top = 500;
+        region_exit.bottom = region_exit.top + BUTTON_HEIGHT;
+
+        region_help.left = (WINDOW_WIDTH) / 2 - BUTTON_WIDTH / 2 - 30;
+        region_help.right = region_help.left + BUTTON_WIDTH;
+        region_help.top = 220;
+        region_help.bottom = region_help.top + BUTTON_HEIGHT;
+
+        region_about.left = (WINDOW_WIDTH) / 2 - BUTTON_WIDTH / 2 - 30;
+        region_about.right = region_about.left + BUTTON_WIDTH;
+        region_about.top = 340;
+        region_about.bottom = region_about.top + BUTTON_HEIGHT;
+
+
+        start_button = new StartButton(region_start, _T("imgs/start.png"), _T("imgs/start_hovered.png"), _T("imgs/start_pushed.png"));
+        exit_button = new ExitButton(region_exit, _T("imgs/exit.png"), _T("imgs/exit_hovered.png"), _T("imgs/exit_pushed.png"));
+        help_button = new HelpButton(region_help, _T("imgs/help.png"), _T("imgs/help_hovered.png"), _T("imgs/help_pushed.png"));
+        about_button = new AboutButton(region_about, _T("imgs/about.png"), _T("imgs/about_hovered.png"), _T("imgs/about_pushed.png"));
+
+    }
+
+    ~Theme()
+    {
+        delete start_button;
+        delete exit_button;
+        delete help_button;
+        delete about_button;
+    }
+
+    void Draw()// 绘制按钮
+    {
+        start_button->Draw();
+        exit_button->Draw();
+        help_button->Draw();
+        about_button->Draw();
+    }
+
+    void ProcessEvent(const ExMessage& msg)// 处理事件
+    {
+        start_button->ProcessEvent(msg);
+        exit_button->ProcessEvent(msg);
+        help_button->ProcessEvent(msg);
+        about_button->ProcessEvent(msg);
+    }
+
+    void SetButtonsVisibility(bool isVisible) // 设置所有按钮的可见性
+    {
+        start_button->SetVisible(isVisible);
+        exit_button->SetVisible(isVisible);
+        help_button->SetVisible(isVisible);
+        about_button->SetVisible(isVisible);
+    }
+};
+
+int main()
+{
+    initgraph(WINDOW_WIDTH, WINDOW_HEIGHT);
+    int x = 300;
+    int y = 300;
+    ExMessage msg;
+
+    Theme theme;
+    theme.InitTheme();
+
+    BeginBatchDraw();  // 启用双缓冲
+    MazeCreate maze;
+    if(diff==1)
+    {
+        maze.row = 20;
+        maze.col = 20;
+        maze.Start = { 1,1 };
+        maze.End = { 20,20 };
+	}
+	else if (diff == 2)
+	{
+		maze.row = 40;
+		maze.col = 40;
+		maze.Start = { 1,1 };
+		maze.End = { 40,40 };
+	}
+	else if (diff == 3)
+	{
+		maze.row = 60;
+		maze.col = 60;
+		maze.Start = { 1,1 };
+		maze.End = { 60,60 };
+	}
+	else if (diff == 4)
+	{
+		maze.row = 80;
+		maze.col = 80;
+		maze.Start = { 1,1 };
+		maze.End = { 80,80 };
+	}
+    while (running)
+    {
+        DWORD start_time = GetTickCount();
+        while (peekmessage(&msg))
+        {
+            theme.ProcessEvent(msg);
+            if (msg.message == WM_MOUSEMOVE)
+            {
+                x = msg.x;
+                y = msg.y;
+            }
+        }
+        cleardevice();
+
+        if (isStartGame)
+        {
+            cout << "游戏开始" << endl;
+            theme.SetButtonsVisibility(false); // 游戏开始时隐藏所有按钮
+            if (!isCreateMaze)
+            {
+                maze.CreateMaze();
+                isCreateMaze = true;
+            }
+            maze.EasyxPrintMaze();
+        }
+        else
+        {
+            theme.SetButtonsVisibility(true); // 非游戏状态时显示所有按钮
+            theme.Draw();  // 绘制按钮
+        }
+
+        //solidcircle(x, y, 50);
+        FlushBatchDraw();  // 双缓冲绘制
+
+        DWORD end_time = GetTickCount();
+        DWORD delta_time = end_time - start_time;
+
+        if (delta_time < 1000 / 60) // 控制帧率,减少CPU占用
+            Sleep(1000 / 60 - delta_time);
+    }
+    EndBatchDraw();  // 结束双缓冲
+
+    return 0;
+}
