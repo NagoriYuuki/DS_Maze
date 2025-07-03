@@ -19,13 +19,57 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="备份1.cpp" />
+    <ClCompile Include="源.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AutoPlay_mode.h" />
     <ClInclude Include="ButtonBase.h" />
     <ClInclude Include="Create_Maze.h" />
     <ClInclude Include="Player_Operate.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="imgs\about.png" />
+    <Image Include="imgs\about_hovered.png" />
+    <Image Include="imgs\about_pushed.png" />
+    <Image Include="imgs\astar.png" />
+    <Image Include="imgs\astar_hovered.png" />
+    <Image Include="imgs\astar_pushed.png" />
+    <Image Include="imgs\autoplay.png" />
+    <Image Include="imgs\autoplay_hovered.png" />
+    <Image Include="imgs\autoplay_pushed.png" />
+    <Image Include="imgs\back.png" />
+    <Image Include="imgs\back_hovered.png" />
+    <Image Include="imgs\back_pushed.png" />
+    <Image Include="imgs\bfs.png" />
+    <Image Include="imgs\bfs_hovered.png" />
+    <Image Include="imgs\bfs_pushed.png" />
+    <Image Include="imgs\dfs.png" />
+    <Image Include="imgs\dfs_hovered.png" />
+    <Image Include="imgs\dfs_pushed.png" />
+    <Image Include="imgs\easy.png" />
+    <Image Include="imgs\easy_hovered.png" />
+    <Image Include="imgs\easy_pushed.png" />
+    <Image Include="imgs\exit.png" />
+    <Image Include="imgs\exit_hovered.png" />
+    <Image Include="imgs\exit_pushed.png" />
+    <Image Include="imgs\hard.png" />
+    <Image Include="imgs\hard_hovered.png" />
+    <Image Include="imgs\hard_pushed.png" />
+    <Image Include="imgs\help.png" />
+    <Image Include="imgs\help_hovered.png" />
+    <Image Include="imgs\help_pushed.png" />
+    <Image Include="imgs\lunatic.png" />
+    <Image Include="imgs\lunatic_hovered.png" />
+    <Image Include="imgs\lunatic_pushed.png" />
+    <Image Include="imgs\normal.png" />
+    <Image Include="imgs\normal_hovered.png" />
+    <Image Include="imgs\normal_pushed.png" />
+    <Image Include="imgs\play.png" />
+    <Image Include="imgs\play_hovered.png" />
+    <Image Include="imgs\play_pushed.png" />
+    <Image Include="imgs\start.png" />
+    <Image Include="imgs\start_hovered.png" />
+    <Image Include="imgs\start_pushed.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

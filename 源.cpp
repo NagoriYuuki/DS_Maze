@@ -1,4 +1,6 @@
 #pragma once
+#include<windows.h>
+#pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" ) 
 #include <iostream>
 #include <vector>
 #include <random>
@@ -8,6 +10,8 @@
 #include <conio.h>
 #include <tchar.h>
 #include "Create_Maze.h"
+#include "Player_Operate.h"
+#include "AutoPlay_mode.h"
 
 using namespace std;
 
@@ -16,8 +20,8 @@ using namespace std;
 
 const int WINDOW_WIDTH = 1440;
 const int WINDOW_HEIGHT = 1440;
-const int BUTTON_WIDTH = 192;
-const int BUTTON_HEIGHT = 75;
+const int BUTTON_WIDTH = 270;
+const int BUTTON_HEIGHT = 90;
 
 // 游戏状态-----------------------------------
 int GameState = 1;
@@ -30,11 +34,22 @@ int GameState = 1;
 //7：结算页面
 bool running = true;
 bool isCreateMaze = false;
+bool ResetAPMap = false;
+bool isscan = false;
+int APmode = 0;
+int countvis = 0;
+int countpath = 0;
+bool printpath = false;
+bool isprintpath = false;
+bool isprintvis = false;
+
 // 游戏状态-----------------------------------
 
 
 //调试用变量----------------------------------
 bool judge = 0;
+bool judge2 = 0;
+bool judge3 = 0;
 //调试用变量----------------------------------
 
 
@@ -42,12 +57,12 @@ class Button // 按钮基类
 {
 
 public:
-    Button(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
+	Button(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
     {
-        region = rect;
-        loadimage(&img_idle, path_img_idle);
-        loadimage(&img_hovered, path_img_hovered);
-        loadimage(&img_pushed, path_img_pushed);
+		region = rect;// 按钮的位置
+		loadimage(&img_idle, path_img_idle);// 按钮的自然状态的图片
+		loadimage(&img_hovered, path_img_hovered);// 按钮鼠标悬停状态的图片
+		loadimage(&img_pushed, path_img_pushed);// 按钮的触发状态的图片
         visible = false; // 按钮默认不可见
     }
     ~Button() = default;
@@ -56,7 +71,7 @@ public:
     {
         if (!visible)
             return; // 按钮不可见时不绘制
-        switch (status)
+		switch (status)// 根据按钮状态绘制不同的图片
         {
         case Status::Idle:
             putimage(region.left, region.top, &img_idle);
@@ -70,7 +85,7 @@ public:
         }
     }
 
-    void ProcessEvent(const ExMessage& msg)
+	void ProcessEvent(const ExMessage& msg) // 处理事件
     {
         if (!visible) 
             return; // 按钮不可见时不处理事件
@@ -100,13 +115,13 @@ public:
 
     }
 
-    void ResetStatus()
+	void ResetStatus() // 重置按钮状态
     {
         status = Status::Idle;
     }
 
 
-    void SetVisible(bool isVisible)
+	void SetVisible(bool isVisible) // 设置按钮的可见性
     {
         visible = isVisible;
     }
@@ -128,11 +143,11 @@ private:
         Pushed
     };
 
-private:
-    RECT region;
-    IMAGE img_idle;
-    IMAGE img_hovered;
-    IMAGE img_pushed;
+private:// 按钮的属性
+	RECT region;// 按钮的位置
+	IMAGE img_idle;// 按钮的自然状态的图片
+	IMAGE img_hovered;// 按钮鼠标悬停状态的图片
+	IMAGE img_pushed;// 按钮的触发状态的图片
     Status status = Status::Idle;
     bool visible; // 按钮可见性标志
 };
@@ -142,10 +157,10 @@ class StartButton : public Button
 {
 public:
     StartButton(RECT rect, LPCTSTR path_img_idle, LPCTSTR path_img_hovered, LPCTSTR path_img_pushed)
-        : Button(rect, path_img_idle, path_img_hovered, path_img_pushed) {}
-    ~StartButton() = default;
+		: Button(rect, path_img_idle, path_img_hovered, path_img_pushed) {}// 调用基类构造函数，初始化基类属性，下同
+	~StartButton() = default;// 调用基类析构函数，析构函数为空，使用默认析构函数，可以不用手动释放资源，由基类负责释放资源，避免内存泄漏，下同
 protected:
-    void OnClick()
+	void OnClick()
     {
         GameState = 2;
         SetVisible(false); // 游戏开始时隐藏按钮
@@ -162,7 +177,7 @@ public:
 protected:
     void OnClick()
     {
-        MessageBox(GetHWnd(), _T("这是个还没有写的Help，然后就没有然后了"), _T("Help"), MB_OK);
+        MessageBox(GetHWnd(), _T("这是个还没有写的Help，然后就没有然后了\n二更：现在写完了，belike：↓\n这是一个经典玩法的迷宫小游戏，共设置 Easy、Normal、Hard、Lunatic 四个难度（致敬東方Project）\n对于每个难度设置有玩家操作模式和自动演示模式\n自动演示模式分为 DFS、BFS、Astar 三个算法的演示模式\n玩家操作模式中，使用 ↑  ↓  ←  → 四个按键进行移动操作，使用W S A D 四个按键可以进行更快的移动\n红色圆点是玩家，蓝色方格是起点，红色方格是终点\n游戏的目标很简单，从起点开始，到达终点\n"), _T("Help"), MB_OK);
         Button::ResetStatus();
     }
 };
@@ -176,7 +191,7 @@ public:
 protected:
     void OnClick()
     {
-        MessageBox(GetHWnd(), _T("这是一个还没写完的迷宫游戏……的菜单……"), _T("About"), MB_OK);
+        MessageBox(GetHWnd(), _T("这是一个还没写完的迷宫游戏……的菜单……\n二更：现在也写完了，不止是菜单……\nbelike：↓\n这是数据结构课课程设计大作业——\n基于A*算法的迷宫小游戏开发\n作者：\n然后就没有了……\n灌注NagoriYuuuki谢谢喵~\n小Tips：作者本人并未通关过Lunatic难度（菜\nLunatic难度的首通由软件2302班的WY同学在测试时达成！"), _T("About"), MB_OK);
         Button::ResetStatus();
     }
 
@@ -301,6 +316,15 @@ protected:
     {
         //MessageBox(GetHWnd(), _T("Check"), _T("Check"), MB_OK);
         GameState = 6;
+        APmode = 1;
+        ResetAPMap = false;
+        isscan = false;
+        judge3 = 0;
+		countpath = 0;
+		countvis = 0;
+		printpath = false;
+        isprintpath = false;
+        isprintvis = false;
     }
 };
 
@@ -315,6 +339,15 @@ protected:
     {
         //MessageBox(GetHWnd(), _T("Check"), _T("Check"), MB_OK);
         GameState = 6;
+        APmode = 2;
+        ResetAPMap = false;
+        isscan = false;
+        judge3 = 0;
+        countpath = 0;
+        countvis = 0;
+        printpath = false;
+		isprintpath = false;
+		isprintvis = false;
     }
 };
 
@@ -329,6 +362,15 @@ protected:
     {
         //MessageBox(GetHWnd(), _T("Check"), _T("Check"), MB_OK);
         GameState = 6;
+        APmode = 3;
+        ResetAPMap = false;
+        isscan = false;
+        judge3 = 0;
+        countpath = 0;
+        countvis = 0;
+        printpath = false;
+        isprintpath = false;
+        isprintvis = false;
     }
 };
 
@@ -377,6 +419,9 @@ protected:
         }
         else if (GameState == 6)
         {
+			isscan = false;
+			ResetAPMap = true;
+            isscan = true;
             GameState = 5;
             //isCreateMaze = false;
         }
@@ -393,13 +438,14 @@ protected:
 class Theme// 主题类，包含所有按钮
 {
 public:
+	// 按钮的位置
     RECT region_start, region_exit, region_help, region_about;
 	RECT region_easy, region_normal, region_hard, region_lunatic;
     RECT region_play, region_autoplay;
 	RECT region_dfs, region_bfs, region_astar;
     RECT region_back;
-
-    StartButton* start_button;
+	// 按钮的指针，用于动态创建按钮，可以不用手动释放资源，减少内存泄漏
+	StartButton* start_button;
     ExitButton* exit_button;
     HelpButton* help_button;
     AboutButton* about_button;
@@ -418,7 +464,8 @@ public:
 
     void InitTheme()// 初始化按钮
     {
-        setbkcolor(WHITE);
+		setbkcolor(WHITE);// 设置背景颜色
+		// 按钮位置
         region_start.left = (WINDOW_WIDTH) / 2 - BUTTON_WIDTH / 2 - 30;
         region_start.right = region_start.left + BUTTON_WIDTH;
         region_start.top = 100;
@@ -459,7 +506,7 @@ public:
 		region_lunatic.top = 460;
 		region_lunatic.bottom = region_lunatic.top + BUTTON_HEIGHT;
 
-		region_back.left = (WINDOW_WIDTH) / 6 - BUTTON_WIDTH / 2 - 150;
+		region_back.left = (WINDOW_WIDTH) / 6 - BUTTON_WIDTH / 2 - 100;
 		region_back.right = region_back.left + BUTTON_WIDTH;
 		region_back.top = 50;
 		region_back.bottom = region_back.top + BUTTON_HEIGHT;
@@ -488,28 +535,28 @@ public:
 		region_astar.right = region_astar.left + BUTTON_WIDTH;
 		region_astar.top = 460;
 		region_astar.bottom = region_astar.top + BUTTON_HEIGHT;
-
+        //贴图路径
         start_button = new StartButton(region_start, _T("imgs/start.png"), _T("imgs/start_hovered.png"), _T("imgs/start_pushed.png"));
         exit_button = new ExitButton(region_exit, _T("imgs/exit.png"), _T("imgs/exit_hovered.png"), _T("imgs/exit_pushed.png"));
         help_button = new HelpButton(region_help, _T("imgs/help.png"), _T("imgs/help_hovered.png"), _T("imgs/help_pushed.png"));
         about_button = new AboutButton(region_about, _T("imgs/about.png"), _T("imgs/about_hovered.png"), _T("imgs/about_pushed.png"));
 
-		easy_button = new EasyButton(region_easy, _T("imgs/diff/easy.png"), _T("imgs/diff/easy_hovered.png"), _T("imgs/diff/easy_pushed.png"));
-		normal_button = new NormalButton(region_normal, _T("imgs/diff/normal.png"), _T("imgs/diff/normal_hovered.png"), _T("imgs/diff/normal_pushed.png"));
-		hard_button = new HardButton(region_hard, _T("imgs/diff/hard.png"), _T("imgs/diff/hard_hovered.png"), _T("imgs/diff/hard_pushed.png"));
-		lunatic_button = new LunaticButton(region_lunatic, _T("imgs/diff/lunatic.png"), _T("imgs/diff/lunatic_hovered.png"), _T("imgs/diff/lunatic_pushed.png"));
+		easy_button = new EasyButton(region_easy, _T("imgs/easy.png"), _T("imgs/easy_hovered.png"), _T("imgs/easy_pushed.png"));
+		normal_button = new NormalButton(region_normal, _T("imgs/normal.png"), _T("imgs/normal_hovered.png"), _T("imgs/normal_pushed.png"));
+		hard_button = new HardButton(region_hard, _T("imgs/hard.png"), _T("imgs/hard_hovered.png"), _T("imgs/hard_pushed.png"));
+		lunatic_button = new LunaticButton(region_lunatic, _T("imgs/lunatic.png"), _T("imgs/lunatic_hovered.png"), _T("imgs/lunatic_pushed.png"));
 
 		back_button = new BackButton(region_back, _T("imgs/back.png"), _T("imgs/back_hovered.png"), _T("imgs/back_pushed.png"));
 
-		play_button = new PlayButton(region_play, _T("imgs/mode/play.png"), _T("imgs/mode/play_hovered.png"), _T("imgs/mode/play_pushed.png"));
-		autoplay_button = new AutoPlayButton(region_autoplay, _T("imgs/mode/autoplay.png"), _T("imgs/mode/autoplay_hovered.png"), _T("imgs/mode/autoplay_pushed.png"));
+		play_button = new PlayButton(region_play, _T("imgs/play.png"), _T("imgs/play_hovered.png"), _T("imgs/play_pushed.png"));
+		autoplay_button = new AutoPlayButton(region_autoplay, _T("imgs/autoplay.png"), _T("imgs/autoplay_hovered.png"), _T("imgs/autoplay_pushed.png"));
 
-		dfs_button = new DFSButton(region_dfs, _T("imgs/mode/dfs.png"), _T("imgs/mode/dfs_hovered.png"), _T("imgs/mode/dfs_pushed.png"));
-		bfs_button = new BFSButton(region_bfs, _T("imgs/mode/bfs.png"), _T("imgs/mode/bfs_hovered.png"), _T("imgs/mode/bfs_pushed.png"));
-		astar_button = new AstarButton(region_astar, _T("imgs/mode/astar.png"), _T("imgs/mode/astar_hovered.png"), _T("imgs/mode/astar_pushed.png"));
+		dfs_button = new DFSButton(region_dfs, _T("imgs/dfs.png"), _T("imgs/dfs_hovered.png"), _T("imgs/dfs_pushed.png"));
+		bfs_button = new BFSButton(region_bfs, _T("imgs/bfs.png"), _T("imgs/bfs_hovered.png"), _T("imgs/bfs_pushed.png"));
+		astar_button = new AstarButton(region_astar, _T("imgs/astar.png"), _T("imgs/astar_hovered.png"), _T("imgs/astar_pushed.png"));
     }
 
-    ~Theme()
+	~Theme()// 析构函数，释放资源
     {
         delete start_button;
         delete exit_button;
@@ -584,7 +631,7 @@ public:
 		astar_button->ProcessEvent(msg);
     }
 
-    void SetThemeButtonsVisibility(bool isVisible) // 设置所有按钮的可见性
+    void SetThemeButtonsVisibility(bool isVisible) // 设置各个情况下的按钮的可见性
     {
         start_button->SetVisible(isVisible);
         exit_button->SetVisible(isVisible);
@@ -621,29 +668,33 @@ public:
 
 int main()
 {
-    initgraph(WINDOW_WIDTH, WINDOW_HEIGHT);
+	initgraph(WINDOW_WIDTH, WINDOW_HEIGHT);// 初始化图形窗口
     //int x = 300;
     //int y = 300;
-    ExMessage msg;
+	ExMessage msg;// 消息
+	ExMessage Move;// 移动消息
 
-    Theme theme;
-    theme.InitTheme();
+	Theme theme;// 主题
+	theme.InitTheme();// 初始化主题
 
     BeginBatchDraw();  // 启用双缓冲
     MazeCreate maze;
+    Player player(maze);
+	AutoPlay ap(maze);
     while (running)
     {
-        DWORD start_time = GetTickCount();
-        while (peekmessage(&msg))
+		DWORD start_time = GetTickCount();// 记录开始时间，结尾记录结束时间，计算时间差，控制帧率，减少CPU占用，15.9%→0.1%！
+        while (peekmessage(&msg))//接收消息队列
         {
-            theme.ProcessEvent(msg);
+			theme.ProcessEvent(msg);// 处理按钮事件
+			player.PlayerPosition(msg);// 处理玩家移动
             //if (msg.message == WM_MOUSEMOVE)
             //{
             //    x = msg.x;
             //    y = msg.y;
             //}
         }
-        cleardevice();
+        cleardevice();//主循环每次清屏，实现画面刷新
 
         if (GameState==1)
         {
@@ -653,6 +704,8 @@ int main()
             theme.SetBackButtonVisibility(false);
             theme.SetAPlayButtonVisibility(false);
             theme.SetModeButtonVisibility(false);
+			player.SetVisible(false);
+            //player.PlayerInit();
 
             theme.ThemeDraw();  // 绘制按钮
         }
@@ -664,10 +717,12 @@ int main()
             theme.SetBackButtonVisibility(true);
             theme.SetAPlayButtonVisibility(false);
             theme.SetModeButtonVisibility(false);
+            player.SetVisible(false);
 
             theme.DiffDraw();
             theme.BackDraw();
-            if (diff == 1)
+            isCreateMaze = false;
+			if (diff == 1)//根据不同难度设置地图尺寸，起始位置，终点位置
             {
                 maze.row = 20;
                 maze.col = 20;
@@ -714,14 +769,24 @@ int main()
             theme.SetBackButtonVisibility(true);
             theme.SetAPlayButtonVisibility(true);
             theme.SetModeButtonVisibility(false);
+            player.SetVisible(false);
 
+
+            player.PlayerInit();
             theme.APlayDraw();
             theme.BackDraw();
-            if (!isCreateMaze)
+			if (!isCreateMaze)//保证对于一次难度选择只生成一次迷宫
             {
 
                 maze.CreateMaze();
                 isCreateMaze = true;
+				cout << "Maze| :" << maze.row << " " << maze.col << endl;
+                player.PlayerInit();
+            }
+            if (!judge)//同上
+            {
+                maze.PrintMaze();
+                judge = 1;
             }
 
             //maze.EasyxPrintMaze();
@@ -734,14 +799,62 @@ int main()
             theme.SetBackButtonVisibility(true);
             theme.SetAPlayButtonVisibility(false);
             theme.SetModeButtonVisibility(false);
-
+       
 			theme.BackDraw();
+            //cout << "Step1" << endl;
             maze.EasyxPrintMaze();
-            if (!judge)
+            //cout << "Step2" << endl;
+            player.SetVisible(true);
+   //         cout << "Step3" << endl;
+
+            //peekmessage(&msg);
+			//player.PlayerPosition(msg);
+            if(!judge2)
             {
-                maze.PrintMaze();
-                judge = 1;
+				player.PrintMap();//调试用
+                judge2 = 1;
+				maze.check1();
+				cout << "Maze| :" << maze.row << " " << maze.col << endl;//调试用
+				player.showpos();//调试用
             }
+            //maze.PrintMaze();
+			//cout << "Step4" << endl;
+			if (diff == 1)//对于不同难度的玩家位置的绘制，即便在迷宫 数组中的位置相同，难度不同缩放不同，映射到屏幕上的位置也不同
+            {
+				//EasyPlayer* easyplayer = new EasyPlayer();
+    //            easyplayer->PlayerDraw();
+                player.EZPlayerDraw();
+            }
+			else if (diff == 2)
+            {
+				//NormalPlayer* normalplayer = new NormalPlayer();
+				//normalplayer->PlayerDraw();
+                player.NMPlayerDraw();
+            }
+            else if (diff == 3)
+            {
+				//HardPlayer* hardplayer = new HardPlayer();
+				//hardplayer->PlayerDraw();
+				player.HDPlayerDraw();
+            }
+            else if (diff == 4)
+            {
+				//LunaticPlayer* lunaticplayer = new LunaticPlayer();
+				//lunaticplayer->PlayerDraw();
+                player.LNPlayerDraw();
+            }
+
+			if (player.JudgeGame())//判断游戏是否结束
+            {
+                //GameState = 7;
+                if(diff!=4)//常规难度通关
+			        MessageBox(GetHWnd(), _T("You Win!\n Ciallo~"), _T("Congratulations!"), MB_OK);
+				else//Lunatic难度特殊通关
+                    MessageBox(GetHWnd(), _T("YOU BEAT The Lunatic Map！\nOrz"), _T("Congratulations!"), MB_OK);
+				player.GameOver = false;//游戏结束判定复位
+				GameState = 1;//返回主菜单
+            }
+
 
         }
         else if (GameState == 5)
@@ -752,22 +865,95 @@ int main()
             theme.SetBackButtonVisibility(true);
             theme.SetAPlayButtonVisibility(false);
             theme.SetModeButtonVisibility(true);
+            player.SetVisible(false);
 
             theme.ModeDraw();
             theme.BackDraw();
- /*           maze.EasyxPrintMaze();*/
+            //maze.EasyxPrintMaze();
         }
         else if (GameState == 6)
+        {
+			//cout << "奥托普雷游戏中" << endl;
+            theme.SetThemeButtonsVisibility(false);
+            theme.SetDiffButtonsVisibility(false);
+            theme.SetBackButtonVisibility(true);
+            theme.SetAPlayButtonVisibility(false);
+            theme.SetModeButtonVisibility(false);
+            player.SetVisible(false);
+			if (!ResetAPMap)//重置地图
+            {
+                ResetAPMap = true;
+				ap.init();//初始化
+            }
+
+            //if (!judge3)
+            //{
+            //    ap.Check();
+            //    player.Check();
+            //    judge3 = 1;
+            //}
+			if (!isscan)//判断触发搜索（DFS/BFS/A*
+            {
+                isscan = true;
+                ap.scan(APmode);
+            }
+            //ap.PinrtVis();
+            //ap.PirntPath();
+            int pathsize = ap.returnPathSize();
+            int vissize = ap.returnVisSize();
+            if(countvis<vissize)
+            {
+                ap.PrintVis(countvis);
+				countvis++;
+            }
+            if(countvis==vissize-1)
+            {
+                printpath = true;
+				isprintvis = true;
+            }
+            if (isprintvis)
+                ap.PrintAllVis();
+            if (printpath)
+            {
+                if (countpath < pathsize)
+				{
+					ap.PrintPath(countpath);
+					countpath++;
+				}
+            }
+            if(countpath==pathsize-1)
+				isprintpath = true;
+            if(isprintpath)
+                ap.PrintAllPath();
+
+
+            
+			if (!judge3)//调试用
+            {
+                judge3 = 1;
+                ap.checkvvis();
+                ap.Check();
+                cout << "source scan" << endl;
+            }
+
+			theme.BackDraw();
+            maze.EasyxPrintMaze();
+
+        }
+		else if (GameState == 7)//结算页面，废案/可扩展
         {
             theme.SetThemeButtonsVisibility(false);
             theme.SetDiffButtonsVisibility(false);
             theme.SetBackButtonVisibility(true);
             theme.SetAPlayButtonVisibility(false);
             theme.SetModeButtonVisibility(false);
+            player.SetVisible(false);
+			//MessageBox(GetHWnd(), _T("You Win!"), _T("Congratulations!"), MB_OK);
 
-			theme.BackDraw();
-            maze.EasyxPrintMaze();
+            theme.BackDraw();
         }
+
+
         //1:主菜单
         //2:难度选择
         //3:模式选择 

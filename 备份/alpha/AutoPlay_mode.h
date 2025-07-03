@@ -15,7 +15,7 @@ using namespace std;
 class AutoPlay
 {
 public:
-	MazeCreate& maze;//引用传参
+    MazeCreate& maze;
     int asx;
     int asy;
     int aex;
@@ -39,7 +39,7 @@ public:
         init();
     }
 
-    void Check()//调试用
+    void Check()
     {
         cout << "scan ";
 		cout << "Start :" << maze.Start.x << " " << maze.Start.y << endl;
@@ -61,12 +61,12 @@ public:
         }
     }
 
-	void checkvvis()//调试用
+    void checkvvis()
     {
         cout << vvis.size();
     }
 
-	void scan(int x)//选择不同的搜索方式
+    void scan(int x)
     {
         cout << "scanmode: " << x << endl;
         if (x == 1)
@@ -77,7 +77,7 @@ public:
             Astar(maze.Start.x, maze.Start.y);
     }
 
-	void PrintAllVis()//输出搜索过程
+    void PinrtVis()
     {
         for (auto i : vvis)
         {
@@ -88,49 +88,7 @@ public:
         }
     }
 
-    void PrintVis(int x)
-    {
-		for (int i = 0; i < x; i++)
-		{
-			int xx = vvis[i].xx;
-			int yy = vvis[i].yy;
-			ShowVis(xx, yy);
-		}
-    }
-
-
-	void PrintAllPath()//输出可行路径
-    {
-		for (auto i : path)
-		{
-			//Sleep(20);
-			int xx = i.xx;
-			int yy = i.yy;
-			ShowPath(xx, yy);
-		}
-    }
-
-	void PrintPath(int x)
-	{
-        for(int i=0;i<x;i++)
-        {
-			int xx = path[i].xx;
-			int yy = path[i].yy;
-            ShowPath(xx, yy);
-        }
-	}
-
-	int returnPathSize()//返回路径长度
-	{
-		return path.size();
-	}
-
-	int returnVisSize()//返回搜索过程长度
-	{
-		return vvis.size();
-	}
-
-	void init()//初始化
+    void init()
     {
         cout << "INITSCAN" << endl;
         for (int i = 0; i <= n + 2; i++)
@@ -143,18 +101,18 @@ public:
     }
 
 private:
-	vector<pair<int, int>> path;//存储路径
-	vector<pair<int, int>>vvis;//存储搜索过程
+    vector<pair<int, int>> path;
+    vector<pair<int, int>>vvis;
     int luxx, luyy, sz;
 
 
-	bool check(int x, int y)//判断是否越界
+    bool check(int x, int y)
     {
         return x >= 1 && x <= maze.row+2 && y >= 1 && y <= maze.col+2;
     }
 
-	bool dfscheck = false;//用于DFS判断是否找到路径
-	void dfs(int x, int y)//常规DFS
+    bool dfscheck = false;
+    void dfs(int x, int y)
     {
 		cout << "dfs now: " << x << " " << y << endl;
         if (x == maze.End.x && y == maze.End.y)
@@ -164,6 +122,8 @@ private:
         }
         for (int i = 0; i < 4; i++)
         {
+            if (dfscheck)
+                break;
             int xx = x + _x[i], yy = y + _y[i];
             if (!check(xx, yy))
                 continue;
@@ -175,21 +135,14 @@ private:
             vvis.push_back({ xx, yy });
 			//ShowVis(xx, yy);
             dfs(xx, yy);
-            if (dfscheck)
-            {
-				path.push_back({ x, y });
-				return;
-            }
         }
     }
 
-	void bfs(int x, int y)//常规BFS
+    void bfs(int x, int y)
     {
-		vector<vector<pair<int, int>>> last(200, vector<pair<int, int>>(200, { -1, -1 }));//存储前驱节点，用于输出路径
         queue<pair<int, int>> que;
         que.push({ x, y });
         vis[x][y] = 1;
-        last[x][y] = { x,y };
         while (!que.empty())
         {
             int ux = que.front().xx;
@@ -215,25 +168,17 @@ private:
                 if (maze.MazeMap[vx][vy])
                     continue;
                 vis[vx][vy] = 1;
-				last[vx][vy] = { ux, uy };
                 que.push({ vx, vy });
             }
         }
-		pair<int, int>now = { maze.End.x,maze.End.y };
-        while (now != last[now.xx][now.yy])
-        {
-			path.push_back(now);
-			now = last[now.xx][now.yy];
-        }
-		path.push_back({ maze.Start.x,maze.Start.y });
     }
 
-	int h(int x, int y)//A*算法的启发函数，计算当前位置到终点的曼哈顿距离
+    int h(int x, int y)
     {
         return abs(x - maze.End.x) + abs(y - maze.End.y);
     }
 
-	int cal(int pay, int x, int y)//A*算法的启发函数，计算当前位置到终点的曼哈顿距离+当前位置到起点的距离，F(x)=G(x)+H(x)
+    int cal(int pay, int x, int y)
     {
         return h(x, y) + pay;
     }
@@ -243,7 +188,7 @@ private:
         pair<int, int>now;
         int cost;
         int spd;
-		bool operator < (const node& a) const//优先选择F(x)小的节点进行扩展
+        bool operator < (const node& a) const
         {
             return cost > a.cost;
         }
@@ -252,13 +197,11 @@ private:
 #define xx first
 #define yy second
 
-    void Astar(int x, int y)//
+    void Astar(int x, int y)
     {
-		vector<vector<pair<int, int>>> last(200, vector<pair<int, int>>(200, { -1, -1 }));//存储前驱节点，用于输出路径
+        vis[x][y] = 1;
         priority_queue<node>que;
         que.push({ {x, y}, cal(0, x, y), 0 });
-        vis[x][y] = 1;
-		last[x][y] = { x,y };
         while (!que.empty())
         {
             int ux = que.top().now.xx;
@@ -284,21 +227,13 @@ private:
                 if (maze.MazeMap[vx][vy])
                     continue;
                 vis[vx][vy] = 1;
-				last[vx][vy] = { ux, uy };
                 que.push({ {vx, vy}, cal(spd + 1, vx, vy), spd + 1 });
             }
         }
-		pair<int, int>now = { maze.End.x,maze.End.y };
-		while (now != last[now.xx][now.yy])//根据前驱节点输出路径
-		{
-			path.push_back(now);
-			now = last[now.xx][now.yy];
-		}
-        path.push_back({ maze.Start.x,maze.Start.y });
     }
 
 
-	void ShowVis(int x, int y)//显示搜索过程
+    void ShowVis(int x,int y)
     {
         setfillcolor(YELLOW);
         if (diff == 1)
@@ -331,39 +266,4 @@ private:
         POINT pt[4] = { {lux, luy}, {ldx, ldy}, {rdx, rdy}, {rux, ruy} };
 		fillpolygon(pt, 4);
     }
-
-	void ShowPath(int x, int y)//显示路径
-    {
-        setfillcolor(RGB(255, 65, 129));
-        if (diff == 1)
-        {
-            luxx = 400;
-            luyy = 100;
-            sz = 30;
-        }
-        else if (diff == 2)
-        {
-            sz = 15;
-            luxx = 450;
-            luyy = 100;
-        }
-        else if (diff == 3)
-        {
-            sz = 11;
-            luxx = 370;
-            luyy = 50;
-        }
-        else if (diff == 4)
-        {
-            sz = 10;
-            luxx = 350;
-            luyy = 10;
-        }
-        int nowposx = luxx + sz * y;
-        int nowposy = luyy + sz * x;
-        int lux = nowposx, luy = nowposy, ldx = nowposx + sz, ldy = nowposy, rux = nowposx, ruy = nowposy + sz, rdx = nowposx + sz, rdy = nowposy + sz;
-        POINT pt[4] = { {lux, luy}, {ldx, ldy}, {rdx, rdy}, {rux, ruy} };
-        fillpolygon(pt, 4);
-    }
-
 };

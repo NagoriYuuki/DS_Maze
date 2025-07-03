@@ -35,17 +35,17 @@ public:
         int row, col, direct;
     };
 
-	vector<InBlock> Block; // 记录迷宫中的墙，用于Prim算法
+    vector<InBlock> Block; // 记录迷宫中的墙
 
     int now_x = 1, now_y = 1; // 当前位置
 
     int MazeMap[110][110]; // 迷宫地图
 
-	int luxx = 100, luyy = 100, sz = 10; // 迷宫绘制的起始位置和每个格子的大小
+    int luxx = 100, luyy = 100, sz = 10;
 
-	void CreateMaze() // 随机化Prim算法生成迷宫，思路：先生成一个全是墙的迷宫，基于生成树的思想，随机选择一个位置，将其周围的墙打通，直到所有的位置都被访问到，保证迷宫的连通性
+    void CreateMaze() // 随机化Prim算法生成迷宫
     {
-		if (diff == 1)//根据难度选择迷宫的大小
+        if (diff == 1)
         {
             luxx = 400;
             luyy = 100;
@@ -88,16 +88,16 @@ public:
         CountWall();
         //diffchange();
         MazeMap[now_x][now_y] = 1;
-		auto seed = chrono::system_clock::now().time_since_epoch().count();//高精钟获取时间，用于随机数种子
-		srand(seed);//重置随机数种子
-		while (Block.size())//当墙的数量不为0时，代表迷宫未生成完毕，继续生成
+        auto seed = chrono::system_clock::now().time_since_epoch().count();
+        srand(seed);
+        while (Block.size())
         {
             int sz = Block.size();
             int index = rand() % sz;
             int now_direct = Block[index].direct;
             now_x = Block[index].row;
             now_y = Block[index].col;
-            switch (now_direct)//枚举四个方向
+            switch (now_direct)
             {
             case create_down:
             {
@@ -155,7 +155,7 @@ public:
 		return { End.x, End.y };
     }
 
-	void PrintMaze()//输出迷宫地图，调试用
+    void PrintMaze()
     {
 		//cout << "col: " << col << " row: " << row << endl;
   //      cout << "------------------------------------------" << endl;
@@ -182,7 +182,7 @@ public:
 
 
 
-	void EasyxPrintMaze()//绘制迷宫
+    void EasyxPrintMaze()
     {
         //diffchange();
         //cout << "迷宫生成完毕，正在绘制迷宫……" << endl;
@@ -268,7 +268,7 @@ private:
         Block.push_back({ x, y, dir });
     }
 
-	int CountWall() // 计算当前位置周围的墙的数量，返回值为调试用
+    int CountWall() // 计算当前位置周围的墙的数量
     {
         int count = 0;
         if (now_x + 1 <= row)
@@ -313,6 +313,7 @@ private:
         POINT p[] = { {lux,luy},{ldx,ldy},{rdx,rdy},{rux,ruy},{lux,luy} };
         solidpolygon(p, 4);
     }
+
     /*  void diffchange()
       {
           if (diff == 1)

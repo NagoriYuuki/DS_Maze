@@ -5,6 +5,8 @@ VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DS_Maze", "DS_Maze.vcxproj", "{88A469CA-5366-48EE-B144-FC35CB1FF52D}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "YuuukiのMaze！", "..\YuuukiのMaze！\YuuukiのMaze！.vdproj", "{0DB1FD39-7F7A-4047-8F8F-9608179F7584}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,10 @@ Global
 		{88A469CA-5366-48EE-B144-FC35CB1FF52D}.Release|x64.Build.0 = Release|x64
 		{88A469CA-5366-48EE-B144-FC35CB1FF52D}.Release|x86.ActiveCfg = Release|Win32
 		{88A469CA-5366-48EE-B144-FC35CB1FF52D}.Release|x86.Build.0 = Release|Win32
+		{0DB1FD39-7F7A-4047-8F8F-9608179F7584}.Debug|x64.ActiveCfg = Debug
+		{0DB1FD39-7F7A-4047-8F8F-9608179F7584}.Debug|x86.ActiveCfg = Debug
+		{0DB1FD39-7F7A-4047-8F8F-9608179F7584}.Release|x64.ActiveCfg = Release
+		{0DB1FD39-7F7A-4047-8F8F-9608179F7584}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

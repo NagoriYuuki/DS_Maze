@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="备份1.cpp">
+    <ClCompile Include="源.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,5 +32,133 @@
     <ClInclude Include="AutoPlay_mode.h">
       <Filter>头文件</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="imgs\about.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\about_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\about_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\astar.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\astar_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\astar_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\autoplay.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\autoplay_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\autoplay_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\back.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\back_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\back_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\bfs.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\bfs_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\bfs_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\dfs.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\dfs_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\dfs_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\easy.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\easy_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\easy_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\exit.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\exit_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\exit_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\hard.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\hard_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\hard_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\help.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\help_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\help_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\lunatic.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\lunatic_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\lunatic_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\normal.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\normal_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\normal_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\play.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\play_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\play_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\start.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\start_hovered.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="imgs\start_pushed.png">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>
